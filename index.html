@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+</head>
+<body onload="startGame()">
+<script>
+//
+// Development by Evelyn (Ye Bin) Ahn - Eastlake Highschool, class of 2020
+// Designed by Suzy Ahn
+//
+var myTurns;
+var nTurns = 0;
+
+var myRolls;
+var nRolls = 100;
+
+var myPiece;
+var nBoard = [];
+
+function startGame() {
+    // Reset game variables
+    resetGame();
+
+    // Create myGameArea and add text components
+    myTurns = new component("20px", "Arial", "black", 0, 30, "text");
+    myRolls = new component("20px", "Arial", "black", 0, 60, "text");
+    myPiece = new component(40, 40, "black", 0, 100);
+
+    myGameArea.start();
+
+    // Display game board 
+    updateGameArea()
+}
+
+function resetGame() {
+    nTurns = 0;
+    nRolls = 100;
+
+    // Create nBoard Array
+    if (nBoard.length == 0) {
+        var board = new Array(10);
+        // Loop to create 2D array using 1D array 
+        for (var i = 0; i < 10; i++) { 
+            board[i] = new Array(10); 
+        }
+        nBoard = board;
+    }
+
+    // Clear nBoard Array
+    for (var i = 0; i < 10; i++) {
+        for (var j = 0; j < 10; j++) {
+            nBoard[i][j] = false;
+        }
+    }
+}
+
+var myGameArea = {
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = 400;
+        this.canvas.height = 500;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        },
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+}
+
+function component(width, height, color, x, y, type) {
+    this.type = type;
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+    this.update = function() {
+        ctx = myGameArea.context;
+        if (this.type == "text") {
+            ctx.font = this.width + " " + this.height;
+            ctx.fillStyle = color;       
+            ctx.fillText(this.text, this.x, this.y);
+        } else {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+    this.border = function() {
+        ctx = myGameArea.context;
+        ctx.fillStyle = color;
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+    }
+}
+
+function updateGameArea() {
+    myTurns.text="Turn Number: " + nTurns;
+    myRolls.text = "Number of Dice Remaining: " + nRolls;
+
+    myGameArea.clear();
+    myTurns.update();
+    myRolls.update();
+
+    // Display
+    var sx = 0;
+    var sy = 80;
+    for (var i = 0; i < 10; i++) {
+        myPiece.y = i * 40 + sy;
+        myPiece.x = sx;
+        for (var j = 0; j < 10; j++) {
+            if (nBoard[i][j])
+                myPiece.update();
+            else
+                myPiece.border();
+            myPiece.x += 40;
+        }
+    }
+}
+
+function rollDiceButton() {
+    // Roll the dice and get the count
+    var count = 0;
+    for (var i = 0; i < nRolls; i++) {
+        var diceRoll = Math.floor( Math.random() * 6 ) + 1;
+        if (diceRoll == 6) count++;
+    }
+    if (nRolls < count) count = nRolls;
+
+    // Fill count of true to the board
+    var i = 0;
+    while (i < count) {
+        var x = Math.floor(Math.random() * 10);
+        var y = Math.floor(Math.random() * 10);
+        if (nBoard[x][y] == false) {
+            nBoard[x][y] = true;
+            i++;
+        }
+    }
+
+    // Update nRosls and display
+    nRolls -= count;
+    if (nRolls < 0) nRolls = 0;
+    nTurns++;
+    updateGameArea();
+}
+
+function resetGameButton() {
+    resetGame();
+    updateGameArea();
+}
+
+</script>
+<br>
+<input id="button1" type="submit" name="button" onclick="rollDiceButton();" value="Roll Dice"/>
+<input id="button2" type="submit" name="button2" onclick="resetGameButton();" value="Reset Game"/>
+
+</body>
+</html>
